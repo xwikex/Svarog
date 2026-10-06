@@ -1,0 +1,4 @@
+{"timestamp":"2026-08-03T12:01:00+08:00","source_ip":"198.51.100.10","method":"GET","host":"demo.local","path":"/search","query":"id=1 UNION SELECT password FROM users","status":403,"user_agent":"Mozilla/5.0","request_id":"attack-sqli"}
+{"timestamp":"2026-08-03T12:02:00+08:00","source_ip":"198.51.100.11","method":"GET","host":"demo.local","path":"/search","query":"q=%3Cscript%3Ealert(1)%3C/script%3E","status":403,"user_agent":"Mozilla/5.0","request_id":"attack-xss"}
+{"timestamp":"2026-08-03T12:03:00+08:00","source_ip":"198.51.100.12","method":"GET","host":"demo.local","path":"/download/%2e%2e/%2e%2e/etc/passwd","status":404,"user_agent":"Mozilla/5.0","request_id":"attack-path"}
+{"timestamp":"2026-08-03T12:04:00+08:00","source_ip":"198.51.100.13","method":"GET","host":"demo.local","path":"/.env","status":404,"user_agent":"sqlmap/1.8","request_id":"attack-scan"}

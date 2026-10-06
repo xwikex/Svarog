@@ -1,0 +1,2 @@
+# Frozen upstream lockfile fixtures are verified byte-for-byte against PROVENANCE.json.
+tests/fixtures/lockfiles/real/**/*.lock -text

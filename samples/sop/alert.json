@@ -1,0 +1,9 @@
+{
+  "alert_id": "DEMO-WEB-001",
+  "title": "同一来源连续访问敏感路径并尝试 SQL 注入",
+  "description": "合成演示告警，仅供测试。请关联访问日志，判断需要补充哪些证据。",
+  "severity": "high",
+  "timestamp": "2026-09-08T10:00:00+08:00",
+  "source_ip": "192.0.2.44",
+  "host": "shop.example"
+}

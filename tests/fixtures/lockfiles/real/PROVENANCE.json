@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "frozen_at": "2026-09-02",
+  "runtime_network_required": false,
+  "fixtures": [
+    {
+      "file": "cleo/poetry.lock",
+      "format": "poetry.lock",
+      "project": "python-poetry/cleo",
+      "repository": "https://github.com/python-poetry/cleo",
+      "commit": "9c5197d407ac18806b1531b57a2a723760ef5c36",
+      "source": "https://raw.githubusercontent.com/python-poetry/cleo/9c5197d407ac18806b1531b57a2a723760ef5c36/poetry.lock",
+      "sha256": "b029b47d3bf738359dfda92e06b8331aa0c1d176ee7427ae4d6fd9590f590174",
+      "size_bytes": 109118,
+      "upstream_license": "MIT",
+      "purpose": "真实 Poetry 锁文件基础解析与冒烟测试"
+    },
+    {
+      "file": "uv-docker-example/uv.lock",
+      "format": "uv.lock",
+      "project": "astral-sh/uv-docker-example",
+      "repository": "https://github.com/astral-sh/uv-docker-example",
+      "commit": "5748835918ec293d547bbe0e42df34e140aca1eb",
+      "source": "https://raw.githubusercontent.com/astral-sh/uv-docker-example/5748835918ec293d547bbe0e42df34e140aca1eb/uv.lock",
+      "sha256": "43f07524f1b045e3377854cc2e1d6d1a919d5ba20ad3112f6ac3e74938f5b3fa",
+      "size_bytes": 158319,
+      "upstream_license": "Apache-2.0 OR MIT",
+      "purpose": "真实 uv 锁文件基础解析与 marker 忽略策略冒烟测试"
+    },
+    {
+      "file": "fastapi-cli/uv.lock",
+      "format": "uv.lock",
+      "project": "fastapi/fastapi-cli",
+      "repository": "https://github.com/fastapi/fastapi-cli",
+      "commit": "575fdbf5825bd0b0ed219a0c87cc8b946403f2e4",
+      "source": "https://raw.githubusercontent.com/fastapi/fastapi-cli/575fdbf5825bd0b0ed219a0c87cc8b946403f2e4/uv.lock",
+      "sha256": "70f4b66eb044f681f10093743734f3d9087e547458a0ad46e536ea093fcc033d",
+      "size_bytes": 349378,
+      "upstream_license": "MIT",
+      "purpose": "真实含 resolution-markers 的 uv 锁文件冒烟测试"
+    }
+  ]
+}

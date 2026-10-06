@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="svarog-csrf" content="__SVAROG_CSRF_TOKEN__">
+  <title>Svarog 安全工作台</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/components/table.js" defer></script>
+  <script src="/pages/history.js" defer></script>
+  <script src="/pages/diff.js" defer></script>
+  <script src="/pages/sbom.js" defer></script>
+  <script src="/pages/settings.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 9v14l-12 7L4 23V9Zm0 5-7 4v9l7 4 7-4v-9Z"/></svg>
+        <div><strong>Svarog</strong><span>安全分析工作台</span></div>
+      </div>
+      <nav id="primary-navigation">
+        <a href="#overview" data-nav-view="overview" aria-current="page">概览</a>
+        <p class="nav-label">安全调查</p>
+        <a href="#sop-new" data-nav-view="sop-new">新建调查</a>
+        <a href="#cases" data-nav-view="cases">案件历史</a>
+        <a href="#web-analysis" data-nav-view="web-analysis">Web 日志分析</a>
+        <p class="nav-label">依赖审计</p>
+        <a href="#python-audit" data-nav-view="python-audit">Python 环境审计</a>
+        <a href="#project-audit" data-nav-view="project-audit">项目审计</a>
+        <a href="#audit-history" data-nav-view="audit-history">审计历史</a>
+        <a href="#audit-diff" data-nav-view="audit-diff">差异对比</a>
+        <a href="#sbom" data-nav-view="sbom">SBOM</a>
+        <p class="nav-label">系统</p>
+        <a href="#doctor" data-nav-view="doctor">Doctor</a>
+        <a href="#settings" data-nav-view="settings">设置</a>
+        <section class="nav-group" data-feature-group hidden aria-labelledby="feature-navigation-title">
+          <p id="feature-navigation-title">扩展功能</p>
+          <div id="feature-navigation"></div>
+        </section>
+      </nav>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button id="nav-toggle" class="nav-toggle" type="button" aria-label="打开主导航" aria-controls="primary-navigation" aria-expanded="false">菜单</button>
+        <button id="preferences-open" class="secondary" type="button" aria-controls="preferences-drawer" aria-expanded="false">界面偏好</button>
+      </header>
+
+      <main id="main-content" tabindex="-1">
+        <div id="global-status" class="sr-only" aria-live="assertive"></div>
+        <div id="global-notice" class="sr-only" aria-live="polite"></div>
+
+        <section class="view" data-view="overview" aria-labelledby="overview-title">
+          <div class="page-heading"><div><p class="eyebrow">总览</p><h1 id="overview-title">安全运行概览</h1><p>集中查看待复核案件与最近活动。</p></div><button type="button" data-refresh-overview>刷新</button></div>
+          <div class="metrics" id="overview-metrics" aria-live="polite"></div>
+          <section class="panel"><div class="panel-heading"><h2>最近案件</h2><a href="#cases" data-go-view="cases">查看全部</a></div><div id="overview-recent" class="table-wrap"></div></section>
+          <section class="panel"><div class="panel-heading"><h2>最近运行</h2></div><div data-recent-runs aria-live="polite"></div></section>
+        </section>
+
+        <section class="view" data-view="sop-new" aria-labelledby="sop-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">调查流程</p><h1 id="sop-title">新建告警调查</h1></div></div>
+          <form id="sop-form" class="panel form-grid" novalidate>
+            <div class="field"><label for="sop-alert">告警 JSON</label><input id="sop-alert" name="alert" type="file" accept=".json,application/json" aria-describedby="sop-alert-help sop-alert-error"><p id="sop-alert-help" class="helper">最大 64 KiB，仅作为只读副本分析。</p><p id="sop-alert-error" class="field-error"></p></div>
+            <div class="field"><label for="sop-logs">日志文件</label><input id="sop-logs" name="logs" type="file" accept=".jsonl,.log,text/plain" aria-describedby="sop-logs-help sop-logs-error"><p id="sop-logs-help" class="helper">最大 10 MiB，支持 JSONL 或 Nginx combined。</p><p id="sop-logs-error" class="field-error"></p></div>
+            <div class="field"><label for="sop-log-format">日志格式</label><select id="sop-log-format" name="log_format" aria-describedby="sop-log-format-help sop-log-format-error"><option value="jsonl">本地 JSONL</option><option value="nginx-combined">Nginx combined</option></select><p id="sop-log-format-help" class="helper">选择与上传文件一致的格式。</p><p id="sop-log-format-error" class="field-error"></p></div>
+            <div class="field" data-nginx-host hidden><label for="sop-log-host">Nginx 主机名</label><input id="sop-log-host" name="log_host" type="text" maxlength="253" aria-describedby="sop-log-host-help sop-log-host-error"><p id="sop-log-host-help" class="helper">Nginx 日志未包含 host 时用于关联告警。</p><p id="sop-log-host-error" class="field-error"></p></div>
+            <div class="field"><label for="sop-window">时间窗口（分钟）</label><input id="sop-window" name="window_minutes" type="number" min="1" max="1440" value="15" aria-describedby="sop-window-help sop-window-error"><p id="sop-window-help" class="helper">围绕告警时间查询。</p><p id="sop-window-error" class="field-error"></p></div>
+            <div class="field"><label for="sop-limit">结果上限</label><input id="sop-limit" name="limit" type="number" min="1" max="1000" value="200" aria-describedby="sop-limit-help sop-limit-error"><p id="sop-limit-help" class="helper">超出时报告会明确标记截断。</p><p id="sop-limit-error" class="field-error"></p></div>
+            <div class="field full"><label for="sop-agent-config">Agent 配置路径（可选）</label><input id="sop-agent-config" name="agent_config" type="text" placeholder="config/agent.toml" aria-describedby="sop-agent-config-help sop-agent-config-error"><p id="sop-agent-config-help" class="helper">工作区相对路径；留空使用本地规则。</p><p id="sop-agent-config-error" class="field-error"></p></div>
+            <div class="form-actions full"><button type="submit">开始只读调查</button><p class="form-status" aria-live="polite"></p></div>
+          </form>
+          <section class="panel result-panel" id="sop-result" aria-live="polite" hidden><h2>调查结果</h2><div data-result-body></div></section>
+        </section>
+
+        <section class="view" data-view="cases" aria-labelledby="cases-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">人工复核</p><h1 id="cases-title">案件历史</h1><p>查询调查记录并登记人工意见。</p></div></div>
+          <form id="cases-filter" class="panel filter-grid">
+            <div class="field"><label for="cases-query">搜索</label><input id="cases-query" type="search" maxlength="256" aria-describedby="cases-query-help"><p id="cases-query-help" class="helper">按案件、告警或标题搜索。</p></div>
+            <div class="field"><label for="cases-status">状态</label><select id="cases-status" aria-describedby="cases-status-help"><option value="">全部</option><option value="awaiting_review">待复核</option><option value="approved">已批准</option><option value="rejected">已拒绝</option><option value="needs_investigation">需继续调查</option></select><p id="cases-status-help" class="helper">状态包含文字说明，不仅依赖颜色。</p></div>
+            <button type="submit">应用筛选</button>
+          </form>
+          <section class="panel"><div id="cases-list" class="table-wrap" aria-live="polite"></div><div class="pagination"><button id="cases-prev" type="button">上一页</button><span id="cases-page">第 1 页</span><button id="cases-next" type="button">下一页</button></div></section>
+          <section class="panel" id="case-detail" hidden><h2>案件详情</h2><div data-case-body></div>
+            <form id="review-form" class="form-grid" novalidate>
+              <div class="field"><label for="review-decision">复核决定</label><select id="review-decision" name="decision" aria-describedby="review-decision-help review-decision-error"><option value="approve">批准建议</option><option value="reject">拒绝建议</option><option value="needs_investigation">需继续调查</option></select><p id="review-decision-help" class="helper">批准仅记录复核意见，不执行处置。</p><p id="review-decision-error" class="field-error"></p></div>
+              <div class="field"><label for="review-reviewer">复核人</label><input id="review-reviewer" name="reviewer" maxlength="128" aria-describedby="review-reviewer-help review-reviewer-error"><p id="review-reviewer-help" class="helper">填写本次复核人的名称。</p><p id="review-reviewer-error" class="field-error"></p></div>
+              <div class="field full"><label for="review-note">复核说明</label><textarea id="review-note" name="note" maxlength="2000" aria-describedby="review-note-help review-note-error"></textarea><p id="review-note-help" class="helper">记录证据核对和决定理由。</p><p id="review-note-error" class="field-error"></p></div>
+              <div class="form-actions full"><button type="submit">记录复核意见</button><p class="form-status" aria-live="polite"></p></div>
+            </form>
+          </section>
+        </section>
+
+        <section class="view" data-view="web-analysis" aria-labelledby="analyze-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">日志检测</p><h1 id="analyze-title">Web 日志分析</h1><p>上传本地 JSONL 日志，识别可疑请求。</p></div></div>
+          <form id="analyze-form" class="panel form-grid" novalidate>
+            <div class="field full"><label for="analyze-logs">JSONL 日志</label><input id="analyze-logs" name="logs" type="file" accept=".jsonl,text/plain" aria-describedby="analyze-logs-help analyze-logs-error"><p id="analyze-logs-help" class="helper">最大 10 MiB；原文件不会被修改。</p><p id="analyze-logs-error" class="field-error"></p></div>
+            <div class="form-actions full"><button type="submit">分析日志</button><p class="form-status" aria-live="polite"></p></div>
+          </form><section class="panel result-panel" id="analyze-result" aria-live="polite" hidden><h2>分析结果</h2><div data-result-body></div></section>
+        </section>
+
+        <section class="view" data-view="python-audit" aria-labelledby="python-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">依赖风险</p><h1 id="python-title">Python 环境审计</h1><p>审计明确指定的虚拟环境与漏洞知识库。</p></div></div>
+          <form id="python-audit-form" class="panel form-grid audit-form" novalidate>
+            <div class="field full"><label for="python-environment">Python 环境目录</label><input id="python-environment" name="environment" value=".venv" aria-describedby="python-environment-help python-environment-error"><p id="python-environment-help" class="helper">仅填写工作区相对路径。</p><p id="python-environment-error" class="field-error"></p></div>
+            <fieldset class="field full"><legend>漏洞来源</legend><label for="python-source-db"><input id="python-source-db" name="vuln_source" type="radio" value="db" checked aria-describedby="python-source-help python-source-error"> 本地 SQLite</label><label for="python-source-api"><input id="python-source-api" name="vuln_source" type="radio" value="api" aria-describedby="python-source-help python-source-error"> 远程 API</label><p id="python-source-help" class="helper">二选一；Token 只从服务器环境变量读取。</p><p id="python-source-error" class="field-error"></p></fieldset>
+            <div class="field"><label for="python-vuln-db">漏洞数据库路径</label><input id="python-vuln-db" name="vuln_db" aria-describedby="python-vuln-db-help python-vuln-db-error"><p id="python-vuln-db-help" class="helper">工作区内 SQLite 文件。</p><p id="python-vuln-db-error" class="field-error"></p></div>
+            <div class="field"><label for="python-vuln-api">漏洞 API 地址</label><input id="python-vuln-api" name="vuln_api" aria-describedby="python-vuln-api-help python-vuln-api-error"><p id="python-vuln-api-help" class="helper">使用本地服务地址；前端不保存认证信息。</p><p id="python-vuln-api-error" class="field-error"></p></div>
+            <div class="form-actions full"><button type="submit">审计环境</button><p class="form-status" aria-live="polite"></p></div>
+          </form><section class="panel result-panel" id="python-result" aria-live="polite" hidden><h2>审计结果</h2><div data-result-body></div></section>
+        </section>
+
+        <section class="view" data-view="project-audit" aria-labelledby="project-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">锁文件对账</p><h1 id="project-title">项目审计</h1><p>对比实际环境与 poetry.lock 或 uv.lock。</p></div></div>
+          <form id="project-audit-form" class="panel form-grid audit-form" novalidate>
+            <div class="field"><label for="project-environment">Python 环境目录</label><input id="project-environment" name="environment" value=".venv" aria-describedby="project-environment-help project-environment-error"><p id="project-environment-help" class="helper">工作区相对路径。</p><p id="project-environment-error" class="field-error"></p></div>
+            <div class="field"><label for="project-lock">锁文件</label><input id="project-lock" name="lock_file" value="uv.lock" aria-describedby="project-lock-help project-lock-error"><p id="project-lock-help" class="helper">仅支持 poetry.lock 或 uv.lock。</p><p id="project-lock-error" class="field-error"></p></div>
+            <fieldset class="field full"><legend>漏洞来源</legend><label for="project-source-db"><input id="project-source-db" name="vuln_source" type="radio" value="db" checked aria-describedby="project-source-help project-source-error"> 本地 SQLite</label><label for="project-source-api"><input id="project-source-api" name="vuln_source" type="radio" value="api" aria-describedby="project-source-help project-source-error"> 远程 API</label><p id="project-source-help" class="helper">二选一，页面不接收 Token。</p><p id="project-source-error" class="field-error"></p></fieldset>
+            <div class="field"><label for="project-vuln-db">漏洞数据库路径</label><input id="project-vuln-db" name="vuln_db" aria-describedby="project-vuln-db-help project-vuln-db-error"><p id="project-vuln-db-help" class="helper">工作区内 SQLite 文件。</p><p id="project-vuln-db-error" class="field-error"></p></div>
+            <div class="field"><label for="project-vuln-api">漏洞 API 地址</label><input id="project-vuln-api" name="vuln_api" aria-describedby="project-vuln-api-help project-vuln-api-error"><p id="project-vuln-api-help" class="helper">仅填写明确的本地或 HTTPS 服务。</p><p id="project-vuln-api-error" class="field-error"></p></div>
+            <div class="form-actions full"><button type="submit">审计项目</button><p class="form-status" aria-live="polite"></p></div>
+          </form><section class="panel result-panel" id="project-result" aria-live="polite" hidden><h2>审计结果</h2><div data-result-body></div></section>
+        </section>
+
+        <section class="view" data-view="audit-history" aria-labelledby="history-title" hidden>
+          <div class="page-heading"><h1 id="history-title">审计历史</h1></div>
+          <form id="history-filter" class="panel history-filters">
+            <div class="field"><label for="history-kind">类型</label><select id="history-kind" name="audit_kind" aria-describedby="history-kind-error"><option value="">全部</option><option value="python_environment">Python 环境</option><option value="python_project">项目依赖</option></select><p class="field-error" id="history-kind-error"></p></div>
+            <div class="field"><label for="history-status">状态</label><select id="history-status" name="run_status" aria-describedby="history-status-error"><option value="">全部</option><option value="completed_computed">已完成</option><option value="completed_reused">已复用</option><option value="failed">失败</option><option value="interrupted">中断</option></select><p class="field-error" id="history-status-error"></p></div>
+            <div class="field"><label for="history-reused">复用</label><select id="history-reused" name="reused" aria-describedby="history-reused-error"><option value="">全部</option><option value="1">是</option><option value="0">否</option></select><p class="field-error" id="history-reused-error"></p></div>
+            <div class="field"><label for="history-from">开始时间</label><input id="history-from" name="completed_from" type="date" aria-describedby="history-from-error"><p class="field-error" id="history-from-error"></p></div>
+            <div class="field"><label for="history-to">结束时间</label><input id="history-to" name="completed_to" type="date" aria-describedby="history-to-error"><p class="field-error" id="history-to-error"></p></div>
+            <div class="form-actions"><button type="submit">筛选</button><p class="form-status" aria-live="polite"></p></div>
+          </form>
+          <section class="panel"><div id="history-list" class="table-wrap" aria-live="polite"></div><div class="pagination"><button id="history-prev" type="button" class="secondary">上一页</button><span id="history-page">第 1 页</span><button id="history-next" type="button" class="secondary">下一页</button></div></section>
+          <section class="panel" id="history-detail" tabindex="-1" hidden><div class="panel-heading"><h2>快照详情</h2><button id="history-close-detail" type="button" class="secondary">关闭</button></div><div id="history-detail-content"></div></section>
+        </section>
+
+        <section class="view" data-view="audit-diff" aria-labelledby="diff-title" hidden>
+          <div class="page-heading"><h1 id="diff-title">差异对比</h1></div>
+          <form id="diff-form" class="panel form-grid" novalidate>
+            <div class="field"><label for="diff-baseline">基线快照</label><input id="diff-baseline" name="baseline_snapshot_id" type="number" min="1" list="diff-snapshots" aria-describedby="diff-baseline-error"><p class="field-error" id="diff-baseline-error"></p></div>
+            <div class="field"><label for="diff-target">目标快照</label><input id="diff-target" name="target_snapshot_id" type="number" min="1" required list="diff-snapshots" aria-describedby="diff-target-error"><p class="field-error" id="diff-target-error"></p></div>
+            <datalist id="diff-snapshots"></datalist>
+            <div class="form-actions full"><button type="submit">生成差异</button><p class="form-status" aria-live="polite"></p></div>
+          </form>
+          <section class="panel" id="diff-result" hidden aria-live="polite"><h2>差异结果</h2><div id="diff-result-content"></div></section>
+        </section>
+
+        <section class="view" data-view="sbom" aria-labelledby="sbom-title" hidden>
+          <div class="page-heading"><h1 id="sbom-title">SBOM</h1></div>
+          <form id="sbom-form" class="panel form-grid" novalidate>
+            <div class="field"><label for="sbom-snapshot">快照编号</label><input id="sbom-snapshot" name="snapshot_id" type="number" min="1" required list="sbom-snapshots" aria-describedby="sbom-snapshot-error"><p class="field-error" id="sbom-snapshot-error"></p></div>
+            <datalist id="sbom-snapshots"></datalist>
+            <div class="form-actions full"><button type="submit">查看 SBOM</button><p class="form-status" aria-live="polite"></p></div>
+          </form>
+          <section class="panel" id="sbom-result" hidden aria-live="polite"><h2>导出概要</h2><div id="sbom-result-content"></div><a id="sbom-download" class="download-button" href="#" download hidden>下载 CycloneDX JSON</a></section>
+        </section>
+
+        <section class="view" data-view="settings" aria-labelledby="settings-title" hidden>
+          <div class="page-heading"><h1 id="settings-title">设置</h1></div>
+          <form id="project-settings-form" class="panel form-grid" novalidate><div class="field"><label for="settings-project-name">项目名称</label><input id="settings-project-name" name="display_name" maxlength="128" required aria-describedby="settings-project-name-error"><p class="field-error" id="settings-project-name-error"></p></div><div class="form-actions full"><button type="submit">保存名称</button><p class="form-status" aria-live="polite"></p></div></form>
+          <form id="retention-settings-form" class="panel form-grid" novalidate><div class="field"><label for="settings-retention">历史保留天数</label><input id="settings-retention" name="audit_retention_days" type="number" min="3" max="365" required aria-describedby="settings-retention-error"><p class="field-error" id="settings-retention-error"></p></div><div class="form-actions full"><button type="submit">保存保留期</button><p class="form-status" aria-live="polite"></p></div></form>
+          <section class="panel"><h2>数据目录</h2><p id="settings-data-directory" class="path-value"></p><details><summary>技术信息</summary><p id="settings-project-id" class="path-value"></p></details></section>
+        </section>
+
+        <section class="view" data-view="doctor" aria-labelledby="doctor-title" hidden>
+          <div class="page-heading"><div><p class="eyebrow">就绪检查</p><h1 id="doctor-title">Doctor</h1><p>只执行三类核心检查，不收集系统清单。</p></div></div>
+          <form id="doctor-form" class="panel form-grid audit-form" novalidate>
+            <div class="field"><label for="doctor-environment">Python 环境目录</label><input id="doctor-environment" name="environment" value=".venv" aria-describedby="doctor-environment-help doctor-environment-error"><p id="doctor-environment-help" class="helper">工作区相对路径。</p><p id="doctor-environment-error" class="field-error"></p></div>
+            <div class="field"><label for="doctor-lock">锁文件</label><input id="doctor-lock" name="lock_file" value="uv.lock" aria-describedby="doctor-lock-help doctor-lock-error"><p id="doctor-lock-help" class="helper">poetry.lock 或 uv.lock。</p><p id="doctor-lock-error" class="field-error"></p></div>
+            <div class="field full"><label for="doctor-output">报告目录</label><input id="doctor-output" name="output_directory" value="reports" aria-describedby="doctor-output-help doctor-output-error"><p id="doctor-output-help" class="helper">已存在的工作区内目录。</p><p id="doctor-output-error" class="field-error"></p></div>
+            <fieldset class="field full"><legend>漏洞来源</legend><label for="doctor-source-db"><input id="doctor-source-db" name="vuln_source" type="radio" value="db" checked aria-describedby="doctor-source-help doctor-source-error"> 本地 SQLite</label><label for="doctor-source-api"><input id="doctor-source-api" name="vuln_source" type="radio" value="api" aria-describedby="doctor-source-help doctor-source-error"> 远程 API</label><p id="doctor-source-help" class="helper">二选一，仅检查就绪性。</p><p id="doctor-source-error" class="field-error"></p></fieldset>
+            <div class="field"><label for="doctor-vuln-db">漏洞数据库路径</label><input id="doctor-vuln-db" name="vuln_db" aria-describedby="doctor-vuln-db-help doctor-vuln-db-error"><p id="doctor-vuln-db-help" class="helper">工作区内 SQLite 文件。</p><p id="doctor-vuln-db-error" class="field-error"></p></div>
+            <div class="field"><label for="doctor-vuln-api">漏洞 API 地址</label><input id="doctor-vuln-api" name="vuln_api" aria-describedby="doctor-vuln-api-help doctor-vuln-api-error"><p id="doctor-vuln-api-help" class="helper">远程模式只检查明确主机和端口。</p><p id="doctor-vuln-api-error" class="field-error"></p></div>
+            <div class="form-actions full"><button type="submit">运行 Doctor</button><p class="form-status" aria-live="polite"></p></div>
+          </form><section class="panel result-panel" id="doctor-result" aria-live="polite" hidden><h2>检查结果</h2><div data-result-body></div></section>
+        </section>
+        <div id="feature-views"></div>
+      </main>
+    </div>
+  </div>
+
+  <section id="preferences-drawer" class="drawer" aria-labelledby="preferences-title" hidden>
+    <div class="drawer-heading"><h2 id="preferences-title">界面偏好</h2><button id="preferences-close" type="button" class="secondary" aria-label="关闭界面偏好">关闭</button></div>
+    <p>这些设置只保留到当前浏览器会话结束。</p>
+    <div class="field"><label for="pref-page-size">案件每页数量</label><select id="pref-page-size" name="cases_page_size" aria-describedby="pref-page-size-help"><option>10</option><option selected>20</option><option>50</option></select><p id="pref-page-size-help" class="helper">影响案件历史分页。</p></div>
+    <div class="field"><label for="pref-window">默认 SOP 时间窗</label><input id="pref-window" name="default_sop_window" type="number" min="1" max="1440" value="15" aria-describedby="pref-window-help"><p id="pref-window-help" class="helper">单位为分钟。</p></div>
+    <div class="field"><label for="pref-limit">SOP 结果上限</label><input id="pref-limit" name="sop_result_limit" type="number" min="1" max="1000" value="200" aria-describedby="pref-limit-help"><p id="pref-limit-help" class="helper">限制页面默认提交值。</p></div>
+    <div class="field check-field"><label for="pref-details"><input id="pref-details" name="technical_details_open" type="checkbox" aria-describedby="pref-details-help"> 默认展开技术详情</label><p id="pref-details-help" class="helper">只改变显示方式。</p></div>
+    <button id="preferences-save" type="button">保存本次会话偏好</button>
+  </section>
+</body>
+</html>

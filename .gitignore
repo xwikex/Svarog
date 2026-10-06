@@ -1,0 +1,16 @@
+.worktrees/
+.venv/
+.svarog/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+report*.json
+*.sqlite3
+*.db
+svarog.toml
+.env
+sop-agent.local.toml
+/reports/sop-demo/

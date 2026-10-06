@@ -1,0 +1,5 @@
+# Optional. Copy and replace these placeholders; never put an API key in this file.
+base_url = "https://model.example/v1"
+model = "replace-with-your-chat-model"
+api_key_env = "SVAROG_AGENT_API_KEY"
+timeout = 30

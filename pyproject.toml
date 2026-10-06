@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "svarog-security"
+version = "0.2.0"
+description = "Evidence-first local Web security alert analyzer"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "xwikex"}]
+license = {file = "LICENSE"}
+keywords = ["security", "log-analysis", "vulnerability-audit", "sbom"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Operating System :: OS Independent",
+]
+dependencies = ["packaging>=24,<26", "jsonschema>=4.23,<5"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9"]
+
+[project.scripts]
+svarog = "svarog.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"svarog.webui" = ["assets/*.html", "assets/*.css", "assets/*.js", "assets/**/*.js"]
+"svarog.sbom" = ["schemas/cyclonedx/1.7/*.json", "schemas/cyclonedx/1.7/SHA256SUMS"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
